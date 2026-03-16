@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Candor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --navy:#1A2F4A;--navy-deep:#0D1E30;--navy-mid:#243E59;
+  --sand:#F5EDD8;--sand-light:#FDFAF4;--sand-dark:#EDE0C4;
+  --amber:#C17F24;--amber-light:#F5E6C8;
+  --muted:#8A9BA8;--card:#FFFFFF;
+  --t1:#2D6A8F;--t1bg:#E8F4FF;--t2:#8B5E1A;--t2bg:#FFF3DC;--t3:#8B1A1A;--t3bg:#FFE8E8;
+  --funny:#2A6B35;--funnybg:#E8F5EC;--deep-c:#4A2D8B;--deepbg:#EEE8FF;
+  --rel:#8B2D5A;--relbg:#FFE8F3;--wild:#7A3A1A;--wildbg:#FFF0E8;--spicy:#3A3A1A;--spicybg:#F5F5E8;
+}
+html,body{height:100%;background:var(--sand);font-family:'DM Sans',sans-serif;overflow:hidden;position:fixed;width:100%}
+#app{max-width:430px;margin:0 auto;height:100%;height:100dvh;display:flex;flex-direction:column;background:var(--sand);position:relative;overflow:hidden}
+
+/* ── SCREENS ── */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s;will-change:transform}
+.screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
+.screen.slide-back{transform:translateX(-30%);opacity:0;pointer-events:none}
+
+/* ── HOME SCREEN ── */
+#home{background:var(--navy-deep);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.home-header{padding:max(env(safe-area-inset-top),40px) 24px 0;flex-shrink:0}
+.wordmark{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--sand-light);letter-spacing:-.5px}
+.tagline{font-size:13px;color:var(--muted);font-weight:400;margin-top:4px;letter-spacing:.04em}
+.home-hero{padding:28px 24px 20px;flex-shrink:0}
+.hero-deck{background:var(--navy-mid);border-radius:20px;padding:22px;border:1px solid rgba(255,255,255,0.07)}
+.hero-label{font-size:10px;font-weight:500;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.hero-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--sand-light);font-weight:500;line-height:1.3;margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:18px}
+.hero-stats{display:flex;gap:16px;margin-bottom:18px}
+.hstat{font-size:12px;color:var(--muted)}
+.hstat strong{color:var(--sand-light);font-weight:500}
+.btn-play{width:100%;height:52px;border-radius:14px;border:none;background:var(--amber);color:var(--navy-deep);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.01em}
+.btn-play:active{opacity:.85}
+
+.packs-section{padding:0 24px 24px;flex:1}
+.section-label{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+.pack-grid{display:flex;flex-direction:column;gap:10px}
+.pack-card{background:var(--navy-mid);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;border:1px solid rgba(255,255,255,0.06);transition:background .15s}
+.pack-card:active{background:rgba(255,255,255,0.1)}
+.pack-card.locked{opacity:.75}
+.pack-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.pack-info{flex:1;min-width:0}
+.pack-name{font-size:15px;font-weight:500;color:var(--sand-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pack-desc{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pack-badge{font-size:11px;font-weight:500;padding:4px 10px;border-radius:100px;flex-shrink:0}
+.pack-badge.free{background:rgba(193,127,36,0.2);color:var(--amber)}
+.pack-badge.price{background:rgba(255,255,255,0.08);color:var(--sand-light)}
+.lock-icon{font-size:14px;opacity:.5;flex-shrink:0}
+.home-footer{padding:16px 24px;padding-bottom:max(env(safe-area-inset-bottom),20px);text-align:center;flex-shrink:0}
+.footer-note{font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:.03em}
+
+/* ── PACK DETAIL SCREEN ── */
+#pack-detail{background:var(--navy-deep);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.detail-header{padding:max(env(safe-area-inset-top),16px) 20px 0;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.btn-back{height:40px;padding:0 4px;border:none;background:transparent;color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif}
+.btn-back:active{opacity:.6}
+.detail-body{padding:24px 24px 0}
+.detail-pack-icon{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:16px}
+.detail-pack-name{font-family:'Playfair Display',serif;font-size:26px;color:var(--sand-light);font-weight:700;margin-bottom:6px}
+.detail-pack-sub{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:24px}
+.detail-stats{display:flex;gap:0;margin-bottom:24px;background:var(--navy-mid);border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.06)}
+.dstat{flex:1;padding:14px 16px;text-align:center}
+.dstat+.dstat{border-left:1px solid rgba(255,255,255,0.06)}
+.dstat-val{font-size:18px;font-weight:500;color:var(--sand-light)}
+.dstat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.detail-tiers{margin-bottom:24px}
+.tier-row-detail{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.tier-row-detail:last-child{border-bottom:none}
+.tier-pip{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tier-name{font-size:13px;font-weight:500;color:var(--sand-light)}
+.tier-desc{font-size:12px;color:var(--muted);margin-left:auto;text-align:right}
+.sample-label{font-size:10px;font-weight:500;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.sample-q{background:var(--navy-mid);border-radius:14px;padding:16px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.06)}
+.sample-q-text{font-family:'Playfair Display',serif;font-size:15px;color:var(--sand-light);line-height:1.5}
+.sample-q-tier{font-size:11px;color:var(--muted);margin-top:8px}
+.detail-cta{padding:20px 24px;padding-bottom:max(env(safe-area-inset-bottom),24px);flex-shrink:0;background:var(--navy-deep)}
+.btn-unlock{width:100%;height:54px;border-radius:14px;border:none;background:var(--amber);color:var(--navy-deep);font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;cursor:pointer}
+.btn-coming{width:100%;height:54px;border-radius:14px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:15px;cursor:default}
+.btn-play-pack{width:100%;height:54px;border-radius:14px;border:none;background:var(--amber);color:var(--navy-deep);font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;cursor:pointer}
+.btn-play-pack:active{opacity:.85}
+
+/* ── GAME SCREEN ── */
+#game{background:var(--sand)}
+.topbar{padding:env(safe-area-inset-top,16px) 20px 12px;padding-top:max(env(safe-area-inset-top),16px);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.game-back{height:32px;padding:0;border:none;background:transparent;color:var(--navy);font-size:18px;cursor:pointer;opacity:.6;display:flex;align-items:center}
+.game-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--navy);font-weight:500}
+.stats-pill{display:flex;gap:10px}
+.sp{font-size:12px;color:var(--muted);font-weight:400}
+.sp strong{color:var(--navy);font-weight:500}
+.filter-area{padding:0 16px 10px;flex-shrink:0}
+.filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.chip{font-size:12px;font-weight:500;padding:7px 14px;border-radius:100px;border:1.5px solid var(--navy);background:transparent;color:var(--navy);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s;-webkit-user-select:none;user-select:none}
+.chip.on{background:var(--navy);color:var(--sand-light)}
+.tier-row{margin-top:6px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.tier-row::-webkit-scrollbar{display:none}
+.prog-wrap{padding:0 20px 10px;flex-shrink:0}
+.prog-track{height:3px;background:rgba(26,47,74,0.12);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--navy);border-radius:2px;transition:width .4s ease}
+.card-area{flex:1;padding:0 16px 12px;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.qcard{background:var(--card);border-radius:24px;padding:24px;flex:1;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(13,30,48,0.12),0 2px 8px rgba(13,30,48,0.06);overflow:auto;animation:slidein .28s cubic-bezier(.22,.68,0,1.2)}
+@keyframes slidein{from{transform:translateY(24px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+.qcard-top{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.badge{font-size:11px;font-weight:500;padding:4px 12px;border-radius:100px;flex-shrink:0}
+.b-t1{background:var(--t1bg);color:var(--t1)}
+.b-t2{background:var(--t2bg);color:var(--t2)}
+.b-t3{background:var(--t3bg);color:var(--t3)}
+.b-funny{background:var(--funnybg);color:var(--funny)}
+.b-deep{background:var(--deepbg);color:var(--deep-c)}
+.b-relationship{background:var(--relbg);color:var(--rel)}
+.b-wild{background:var(--wildbg);color:var(--wild)}
+.b-spicy{background:var(--spicybg);color:var(--spicy)}
+.qnum{font-size:11px;color:var(--muted);font-weight:400;margin-left:auto}
+.question{font-family:'Playfair Display',serif;font-size:20px;line-height:1.55;color:var(--navy-deep);font-weight:500;flex:1;display:flex;align-items:center;padding:8px 0}
+.drink-box{background:var(--sand);border-radius:14px;padding:14px 16px;margin-top:12px;flex-shrink:0}
+.drink-label{font-size:10px;font-weight:500;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px}
+.drink-text{font-size:14px;color:var(--navy);font-weight:500;line-height:1.4}
+.skip-text{font-size:11px;color:var(--muted);font-style:italic;margin-top:6px}
+.btn-area{flex-shrink:0;padding:8px 16px;padding-bottom:max(env(safe-area-inset-bottom),16px);display:flex;gap:10px}
+.btn-main{flex:1;height:56px;border-radius:16px;border:none;background:var(--navy);color:var(--sand-light);font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .1s,opacity .1s;-webkit-user-select:none;user-select:none}
+.btn-main:active{transform:scale(.97);opacity:.9}
+.btn-sec{height:56px;width:56px;border-radius:16px;border:1.5px solid rgba(26,47,74,0.25);background:transparent;color:var(--navy);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;transition:transform .1s,background .15s;flex-shrink:0;-webkit-user-select:none;user-select:none}
+.btn-sec:active{transform:scale(.95);background:rgba(26,47,74,0.08)}
+.done-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;animation:slidein .3s ease}
+.done-icon{font-size:56px;margin-bottom:20px}
+.done-h{font-family:'Playfair Display',serif;font-size:26px;color:var(--navy);margin-bottom:10px;font-weight:700}
+.done-p{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:28px}
+.done-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px}
+.btn-restart{background:var(--navy);color:var(--sand-light);border:none;border-radius:16px;padding:18px 32px;font-size:16px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer}
+.btn-home-done{background:transparent;color:var(--muted);border:1.5px solid rgba(26,47,74,0.2);border-radius:16px;padding:16px 32px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME SCREEN -->
+  <div class="screen" id="home">
+    <div class="home-header">
+      <div class="wordmark">Candor</div>
+      <div class="tagline">Say what you mean.</div>
+    </div>
+    <div class="home-hero">
+      <div class="hero-deck">
+        <div class="hero-label">Free · Base Deck</div>
+        <div class="hero-title">The questions you actually want answered.</div>
+        <div class="hero-sub">120 questions. Three tiers. Drink rules enforced. Skip Tax applies.</div>
+        <div class="hero-stats">
+          <span class="hstat"><strong>120</strong> questions</span>
+          <span class="hstat"><strong>5</strong> categories</span>
+          <span class="hstat"><strong>3</strong> tiers</span>
+        </div>
+        <button class="btn-play" onclick="startGame('free')">Play Free Deck →</button>
+      </div>
+    </div>
+    <div class="packs-section">
+      <div class="section-label">Packs</div>
+      <div class="pack-grid" id="pack-list"></div>
+    </div>
+    <div class="home-footer">
+      <div class="footer-note">CANDOR · SAY WHAT YOU MEAN</div>
+    </div>
+  </div>
+
+  <!-- PACK DETAIL SCREEN -->
+  <div class="screen hidden" id="pack-detail">
+    <div class="detail-header">
+      <button class="btn-back" onclick="goHome()">← Back</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch">
+      <div class="detail-body" id="detail-body"></div>
+    </div>
+    <div class="detail-cta" id="detail-cta"></div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="screen hidden" id="game">
+    <div class="topbar">
+      <button class="game-back" onclick="goHome()">←</button>
+      <div class="game-title" id="game-title">Candor</div>
+      <div class="stats-pill">
+        <span class="sp"><strong id="s-done">0</strong> done</span>
+        <span class="sp"><strong id="s-left">—</strong> left</span>
+        <span class="sp"><strong id="s-skips">0</strong> skips</span>
+      </div>
+    </div>
+    <div class="filter-area">
+      <div class="filter-row" id="cat-row">
+        <div class="chip on" data-f="cat" data-v="all">All</div>
+        <div class="chip" data-f="cat" data-v="funny">Funny</div>
+        <div class="chip" data-f="cat" data-v="deep">Deep</div>
+        <div class="chip" data-f="cat" data-v="relationship">Relationship</div>
+        <div class="chip" data-f="cat" data-v="wild">Wild</div>
+        <div class="chip" data-f="cat" data-v="spicy">Spicy</div>
+      </div>
+      <div class="tier-row" id="tier-row">
+        <div class="chip on" data-f="tier" data-v="all">All tiers</div>
+        <div class="chip" data-f="tier" data-v="1">Warm Up</div>
+        <div class="chip" data-f="tier" data-v="2">Getting Real</div>
+        <div class="chip" data-f="tier" data-v="3">No Filter</div>
+      </div>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+    </div>
+    <div class="card-area">
+      <div id="card-inner"></div>
+    </div>
+    <div class="btn-area" id="btn-area">
+      <button class="btn-sec" id="btn-skip" title="Skip">↷</button>
+      <button class="btn-main" id="btn-next">Next question →</button>
+      <button class="btn-sec" id="btn-shuffle" title="Reshuffle">⇌</button>
+    </div>
+  </div>
+
+</div>
+<script>
+// ── PACK DEFINITIONS ──
+const PACKS = [
+  {
+    id: 'couples',
+    name: 'Candor: Couples',
+    icon: '🌙',
+    iconBg: '#2D1F4A',
+    price: 4.99,
+    locked: true,
+    tagline: 'For long-term partners.',
+    description: 'Heavier Tier 3, future-planning questions, the conversations you keep almost having. For people who already know each other — and want to know more.',
+    questionCount: 80,
+    categories: ['Relationship','Deep','Spicy'],
+    samples: [
+      {t:3,c:'relationship',q:'What does "home" mean to you right now — and does our life feel like it?'},
+      {t:2,c:'spicy',q:'What's a habit of mine you've been hoping I'll grow out of — but aren't sure I will?'}
+    ]
+  },
+  {
+    id: 'firstdates',
+    name: 'Candor: First Dates',
+    icon: '✨',
+    iconBg: '#1A3A2F',
+    price: 4.99,
+    locked: true,
+    tagline: 'For dates 1–5.',
+    description: 'Lighter Tier 3, heavier on Funny and Wild. Depth without heaviness — for when you want to actually find out who someone is.',
+    questionCount: 80,
+    categories: ['Funny','Wild','Deep'],
+    samples: [
+      {t:1,c:'funny',q:'What's a hill you'll die on that you know is objectively stupid?'},
+      {t:2,c:'wild',q:'What's the most impulsive decision you've made that you've never fully explained?'}
+    ]
+  },
+  {
+    id: 'friends',
+    name: 'Candor: Friends',
+    icon: '🔥',
+    iconBg: '#3A1A1A',
+    price: 4.99,
+    locked: true,
+    tagline: 'For friend groups of 2–6.',
+    description: 'Shared history, things unsaid, plans that never happened. The questions you can ask your best friends that you can't ask anyone else.',
+    questionCount: 80,
+    categories: ['Wild','Funny','Deep'],
+    samples: [
+      {t:2,c:'wild',q:'What's the wildest thing you've witnessed — not done, witnessed — that you've never told me?'},
+      {t:1,c:'funny',q:'What's a phase you went through that you're glad I didn't witness?'}
+    ]
+  },
+  {
+    id: 'family',
+    name: 'Candor: Family',
+    icon: '🌿',
+    iconBg: '#1A3A20',
+    price: 4.99,
+    locked: true,
+    tagline: 'Multigenerational.',
+    description: 'No Spicy category. Questions that work from teens to grandparents — real conversations that don't require anyone to be uncomfortable.',
+    questionCount: 80,
+    categories: ['Funny','Deep','Wild'],
+    samples: [
+      {t:1,c:'deep',q:'What's a piece of advice you dismissed but eventually realized was right?'},
+      {t:1,c:'funny',q:'What's a totally normal thing that inexplicably disgusts you?'}
+    ]
+  },
+  {
+    id: 'roadtrip',
+    name: 'Candor: Road Trip',
+    icon: '🛣️',
+    iconBg: '#1A2A3A',
+    price: 4.99,
+    locked: true,
+    tagline: 'For two people in a car.',
+    description: 'Long-form questions meant to fill 30–45 minutes of driving. No eye contact required. Turns out that helps.',
+    questionCount: 80,
+    categories: ['Deep','Wild','Relationship'],
+    samples: [
+      {t:2,c:'deep',q:'What's a version of your life you could have had that you sometimes genuinely think about?'},
+      {t:3,c:'wild',q:'What's the single biggest swing you could take right now that you've been talking yourself out of?'}
+    ]
+  }
+];
+
+// ── FREE DECK ──
+const FREE_QUESTIONS=[
+  {t:1,c:"funny",q:"What's the worst purchase you've made that you secretly don't regret at all?",d:"Loser of the crowd vote drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"funny",q:"What personality trait do you pretend you don't have but absolutely do?",d:"Other person decides if they agree. If yes, drink 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"funny",q:"What food have you been pretending to enjoy this entire relationship?",d:"Both drink 1 if you've been lying to each other.",sk:"Skip Tax: 1 drink."},
+  {t:1,c:"funny",q:"What is something you do when no one is watching that you'd be mildly embarrassed by?",d:"Person with the weirder answer drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"funny",q:"What's a movie, show, or song you pretend is beneath you but actually love?",d:"Most shameful answer drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"funny",q:"What's your most irrational pet peeve — the one you know is ridiculous but can't shake?",d:"If the other shares this pet peeve, both drink 1.",sk:"Skip Tax: 1 drink."},
+  {t:1,c:"funny",q:"What's something you've Googled in the last month that you'd be embarrassed to show?",d:"Most suspicious search drinks 1.",sk:"Skip Tax: 3 drinks."},
+  {t:1,c:"funny",q:"Describe your ideal Saturday if you had zero obligations and nobody could judge you.",d:"If they sound nothing alike, both drink 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"funny",q:"What's a hill you will absolutely die on even though you know it's objectively stupid?",d:"Person who finds it least defensible drinks 1.",sk:"Skip Tax: 1 drink."},
+  {t:1,c:"funny",q:"What's the most embarrassing thing you've done while driving that you've never told anyone?",d:"Best story gets to assign 2 drinks.",sk:"Skip Tax: 3 drinks."},
+  {t:1,c:"funny",q:"What's a lie you tell yourself regularly that you're aware is a lie?",d:"Most self-aware answer: the other drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"funny",q:"What's the most unhinged opinion you have about a completely trivial topic?",d:"Most unhinged: other person drinks 1.",sk:"Skip Tax: 1 drink."},
+  {t:1,c:"funny",q:"If your inner monologue were broadcast for one hour today, what's the most embarrassing thing people heard?",d:"Everyone drinks 1. No exceptions.",sk:"Skip Tax: n/a — everyone drinks anyway."},
+  {t:1,c:"funny",q:"What's the last thing you bought impulsively that you immediately regretted?",d:"Most wasteful purchase drinks 1.",sk:"Skip Tax: 1 drink."},
+  {t:1,c:"funny",q:"What's a totally normal thing that inexplicably disgusts you?",d:"Weirdest answer gets to assign 1 drink.",sk:"Skip Tax: 1 drink."},
+  {t:1,c:"funny",q:"If you had to pick one reality TV show to live inside for a week, which one and why?",d:"Best reasoning drinks 1 as a reward.",sk:"Skip Tax: 1 drink."},
+  {t:1,c:"deep",q:"If you could re-live one day from the last five years exactly as it was, which one?",d:"Person who answers last drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"deep",q:"What's something you're genuinely proud of that you don't talk about enough?",d:"Listener drinks 1 as an appreciation tax.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"deep",q:"What did you think 'success' looked like at 20, and how has that definition changed?",d:"Biggest shift drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"deep",q:"What's something you've changed your mind on in the last two years?",d:"Most surprising reversal: other person drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"deep",q:"Who in your life has had the single biggest influence on who you became — and do they know it?",d:"If they don't know it, drink 1 and consider fixing that.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"deep",q:"What's a small habit or ritual that you think quietly shapes your whole day?",d:"Drink 1 if yours sounds nothing like theirs.",sk:"Skip Tax: 1 drink."},
+  {t:1,c:"deep",q:"What's one thing you've done that took actual courage — even if nobody else noticed?",d:"Both drink 1 in acknowledgment.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"deep",q:"What's something you've been meaning to do for years that you still haven't done?",d:"Person whose answer is more overdue drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"deep",q:"What's a piece of advice you dismissed but eventually realized was right?",d:"Drink 1 and text that person if they're still in your life.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"deep",q:"If you could give your 16-year-old self one sentence, what would it be?",d:"Most necessary sentence gets to assign 1 drink.",sk:"Skip Tax: 1 drink."},
+  {t:1,c:"relationship",q:"What was the first moment you knew I was actually different from everyone else you'd dated?",d:"Both drink 1 and share answers at the same time.",sk:"Skip Tax: 3 drinks."},
+  {t:1,c:"relationship",q:"On a scale of 1–10, how surprised were you when you realized how serious this was getting?",d:"If your numbers differ by 3+, both drink 2.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"relationship",q:"What's something I do without thinking that you find quietly endearing?",d:"Both drink 1. Mandatory answer.",sk:"Skip Tax: 3 drinks."},
+  {t:1,c:"relationship",q:"What did you think I'd be like before you really knew me — and what were you wrong about?",d:"Most wrong assumption: other person drinks 2.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"relationship",q:"What's one thing we do differently than other couples that you think is actually better?",d:"If you agree, drink together.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"relationship",q:"What's a random memory from early on that still makes you smile?",d:"Both drink 1. No skipping cute memories.",sk:"Skip Tax: 3 drinks."},
+  {t:1,c:"relationship",q:"What's one quality in me that you didn't expect to rely on as much as you do?",d:"If it surprises the other person, they drink 2.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"relationship",q:"When do you feel most like yourself around me?",d:"Both drink 1 and hold that answer.",sk:"Skip Tax: 3 drinks."},
+  {t:1,c:"wild",q:"What's the most unhinged thing you've ever done that somehow worked out fine?",d:"Best story wins — other person drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"wild",q:"What's the most impulsive decision you've made that you've never fully explained to anyone?",d:"Person who told fewer people drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"wild",q:"What's the closest you've come to doing something completely out of character — and what stopped you?",d:"Person who came closer drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"wild",q:"What's something you've done that you'd have 100% judged someone else for doing?",d:"Person with least self-awareness drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"wild",q:"What's the most elaborate lie you ever got away with?",d:"Best liar drinks 1. As a trophy.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"wild",q:"What's the weirdest job or situation you've been in that you almost never talk about?",d:"More interesting story: other person drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"wild",q:"What's the most chaotic situation you were in that wasn't your fault — but you stayed in anyway?",d:"Person who stayed longer drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:1,c:"spicy",q:"Who in your life gives the most unsolicited opinions about our relationship?",d:"Drink 1 for every one you both agree on.",sk:"Skip Tax: 3 drinks."},
+  {t:1,c:"spicy",q:"What's something you've noticed about me that you've never directly brought up?",d:"If it's been over a month, drink 1.",sk:"Skip Tax: 3 drinks."},
+  {t:1,c:"spicy",q:"What's a comparison someone made about me that you agreed with more than you let on?",d:"Honesty = other person drinks 2.",sk:"Skip Tax: 4 drinks."},
+  {t:1,c:"spicy",q:"What's something you were initially worried about when this got serious?",d:"If that thing still applies, both drink 1.",sk:"Skip Tax: 3 drinks."},
+  {t:1,c:"spicy",q:"What's something I do that you'd never tell me bothers you — but it kind of does?",d:"Revelation = you drink 1. They drink 2 if they had no idea.",sk:"Skip Tax: 4 drinks."},
+  {t:2,c:"funny",q:"What is something I do that drives you mildly insane that you've just accepted as part of the deal?",d:"If I didn't know, I drink 2.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"funny",q:"What's the most embarrassing thing you've done in public that I don't know about?",d:"Best/worst story: other person decides who drinks 1.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"funny",q:"Describe me to someone who's never met me — one honest sentence, no flattery.",d:"Person who laughs first drinks 1. Subject drinks 2 if offended.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"funny",q:"What's the most delusional thing you believed about yourself in your 20s?",d:"Most delusional answer gets to assign 2 drinks.",sk:"Skip Tax: 2 drinks."},
+  {t:2,c:"funny",q:"What's a phase you went through that you're glad I didn't witness?",d:"Most cringe phase drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:2,c:"funny",q:"What's a grudge you're still holding that is objectively too small to still be holding?",d:"Most petty grudge holder drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:2,c:"funny",q:"If someone made a reality show about your inner monologue for a week, what would the tagline be?",d:"Best tagline gets to assign 1 drink.",sk:"Skip Tax: 2 drinks."},
+  {t:2,c:"funny",q:"What's the most embarrassing text you've ever sent and immediately regretted?",d:"Most catastrophic text: other person drinks 1.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"funny",q:"What's something completely ordinary that you're irrationally competitive about?",d:"Most unhinged competition: drink 1.",sk:"Skip Tax: 2 drinks."},
+  {t:2,c:"funny",q:"What's a running joke you have with someone that would make zero sense to anyone else?",d:"If explaining it still doesn't help, drink 1.",sk:"Skip Tax: 1 drink."},
+  {t:2,c:"deep",q:"What belief did you hold five years ago that you've completely reversed on?",d:"Person whose reversal is more dramatic drinks 1.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"deep",q:"If you had to describe the version of yourself you're still trying to outrun, what would you say?",d:"Both drink 1. No judgment.",sk:"Skip Tax: 4 drinks."},
+  {t:2,c:"deep",q:"What's something you genuinely don't know if you could handle — not hypothetical, a real one?",d:"Both drink 1. Honesty tax.",sk:"Skip Tax: 4 drinks."},
+  {t:2,c:"deep",q:"What's the most scared you've ever been in your life — and did anyone know?",d:"If nobody knew, drink 1.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"deep",q:"What's a version of your life you could have had that you sometimes genuinely think about?",d:"Both drink 1 and actually sit with that.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"deep",q:"What do you think is holding you back right now that you haven't fully admitted to yourself?",d:"Both drink 2. This one counts.",sk:"Skip Tax: 4 drinks."},
+  {t:2,c:"deep",q:"What's something you've watched someone else do that you admired but knew you wouldn't do yourself?",d:"Person with the better self-awareness drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:2,c:"deep",q:"What's the most intimidated you've ever felt — professionally, socially, physically?",d:"Person who answers last drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:2,c:"deep",q:"What does 'enough' look like to you — financially, professionally, personally?",d:"If you've never actually answered this, drink 1.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"deep",q:"What's something about your childhood that you've never totally figured out how to explain to people who didn't live it?",d:"Both drink 1. Real talk only.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"deep",q:"If the next ten years go exactly as you want, what's different and what's the same?",d:"Person whose answer surprises the other: assign 1 drink.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"relationship",q:"What's one thing I do that makes you feel genuinely taken care of — not the obvious one, the small one?",d:"Both drink 1. Mandatory.",sk:"Skip Tax: 4 drinks. Seriously."},
+  {t:2,c:"relationship",q:"What's one thing about our dynamic that you think is actually rare?",d:"Drink together if you agree.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"relationship",q:"What's the thing I do when you're stressed that actually helps?",d:"If your answer surprises me, I drink 2.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"relationship",q:"What's one thing I do that you've never directly told me you love?",d:"If they're shocked, they drink 2.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"relationship",q:"What's a hard conversation we keep almost having but never fully finishing?",d:"If you name the same one, both drink 2.",sk:"Skip Tax: 4 drinks."},
+  {t:2,c:"relationship",q:"What's gotten quietly better in our relationship over the last year — even if we haven't named it?",d:"Drink together if you agree.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"relationship",q:"What's something I've done that changed how you think about what a relationship is supposed to feel like?",d:"Both drink 1. This one's earned.",sk:"Skip Tax: 4 drinks."},
+  {t:2,c:"relationship",q:"What's a moment from the last year where you were quietly proud of us as a team?",d:"Both drink 1 as a toast.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"relationship",q:"What does a perfect week look like to you right now — and am I in it the way you'd want?",d:"If the answer is surprising, drink 2.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"relationship",q:"What's something you've given up on expecting from relationships generally — but that I actually deliver?",d:"Both drink 1. Real answers only.",sk:"Skip Tax: 4 drinks."},
+  {t:2,c:"wild",q:"What's the most you've ever bent the rules without fully crossing the line?",d:"Most creative rule-bender gets to assign 2 drinks.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"wild",q:"What's a risk you took that didn't pay off — but you'd take again?",d:"Person with the better answer assigns 1 drink.",sk:"Skip Tax: 2 drinks."},
+  {t:2,c:"wild",q:"What's the most you've had to hold it together in public while actually falling apart inside?",d:"Person who held it together better drinks 1.",sk:"Skip Tax: 2 drinks."},
+  {t:2,c:"wild",q:"What's the most you've ever been afraid of losing and didn't tell anyone?",d:"If nobody knew at the time, drink 1.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"wild",q:"What would you do tomorrow if money was completely irrelevant and you couldn't fail?",d:"If the answers are wildly different, both drink 1.",sk:"Skip Tax: 2 drinks."},
+  {t:2,c:"wild",q:"What's the wildest thing you've witnessed — not done, witnessed — that you've never properly told me about?",d:"Best story assigns 2 drinks.",sk:"Skip Tax: 2 drinks."},
+  {t:2,c:"spicy",q:"What's the most honest thing you could say about your relationship with money right now?",d:"Both drink 1. Extra if you've been avoiding this.",sk:"Skip Tax: 4 drinks."},
+  {t:2,c:"spicy",q:"What's a habit of mine that you've been hoping I'll grow out of — but aren't sure I will?",d:"If I didn't know, I drink 2.",sk:"Skip Tax: 4 drinks."},
+  {t:2,c:"spicy",q:"What's something you've been low-key jealous of about my life, friendships, or personality?",d:"Both drink 1. Honesty earns a drink.",sk:"Skip Tax: 4 drinks."},
+  {t:2,c:"spicy",q:"What's something one of our friends does in their relationship that you've thought 'we'd never do that' — and has that ever wavered?",d:"If the answer's surprising, assign 2 drinks.",sk:"Skip Tax: 3 drinks."},
+  {t:2,c:"spicy",q:"What's something I've done in an argument that you've never called me on — but noticed?",d:"Full honesty: I drink 2 as a listening tax.",sk:"Skip Tax: 5 drinks."},
+  {t:2,c:"spicy",q:"What's something about how I handle stress that you wish was different?",d:"If it's something they've told you before, drink 2.",sk:"Skip Tax: 4 drinks."},
+  {t:2,c:"spicy",q:"If you had to bet on the most likely source of friction for us in the next two years, what would it be?",d:"If you name the same thing, both drink 2.",sk:"Skip Tax: 3 drinks."},
+  {t:3,c:"relationship",q:"If this relationship had ended three years ago, what story would you tell yourself about why?",d:"Both drink 2. Take your time.",sk:"Skip Tax: You can't skip this one."},
+  {t:3,c:"relationship",q:"What does 'home' mean to you right now — and does our life feel like it?",d:"Drink together. Whatever the answer is.",sk:"Skip Tax: 5 drinks."},
+  {t:3,c:"relationship",q:"What's the thing I could do that would make you feel most supported in the next chapter?",d:"Both drink 1. Then actually answer it for real later.",sk:"Skip Tax: 5 drinks."},
+  {t:3,c:"relationship",q:"What's one way you've changed since being with me that you're genuinely grateful for?",d:"Both drink 1. Then switch and answer for each other.",sk:"Skip Tax: 4 drinks."},
+  {t:3,c:"relationship",q:"What's a fear about the future that you haven't told me because you didn't want to worry me?",d:"Both drink 2. No defending, just listening.",sk:"Skip Tax: 5 drinks."},
+  {t:3,c:"relationship",q:"What would 'winning' at marriage look like to you in 20 years?",d:"If your definitions match, drink together. If not, both drink 1.",sk:"Skip Tax: 4 drinks."},
+  {t:3,c:"relationship",q:"What do you need from me that you haven't directly asked for?",d:"Both drink 2. Then actually ask for it.",sk:"Skip Tax: You can't skip this one."},
+  {t:3,c:"relationship",q:"If you had to name the one thing that's held us together when it was hard, what would it be?",d:"If you name the same thing, pour a real drink and toast it.",sk:"Skip Tax: 4 drinks."},
+  {t:3,c:"deep",q:"What are you most afraid will be true about you in 15 years if nothing changes?",d:"Both drink 2.",sk:"Skip Tax: 5 drinks."},
+  {t:3,c:"deep",q:"What's something you've never said out loud because you weren't sure how I'd take it?",d:"Honesty: other person drinks 2 as a thank-you.",sk:"Skip Tax: 5 drinks."},
+  {t:3,c:"deep",q:"What's the hardest you've ever had to work to believe you were enough?",d:"Both drink 1. Real talk only.",sk:"Skip Tax: 4 drinks."},
+  {t:3,c:"deep",q:"What part of who you are do you think is the most misunderstood — even by people who love you?",d:"Both drink 1 and sit with the answer.",sk:"Skip Tax: 4 drinks."},
+  {t:3,c:"deep",q:"If you could have a one-hour conversation with a past version of yourself, which version and what would you say?",d:"Drink 1 for every honest thing you'd have to admit.",sk:"Skip Tax: 3 drinks."},
+  {t:3,c:"deep",q:"What's the version of your life you're building right now — and is it actually the one you want?",d:"If you've never asked yourself this out loud, drink 2.",sk:"Skip Tax: 5 drinks."},
+  {t:3,c:"deep",q:"What's something you've mourned quietly — a path not taken, a person, a version of yourself — that you've never told me?",d:"Both drink 1. No fixing, just holding.",sk:"Skip Tax: 5 drinks."},
+  {t:3,c:"deep",q:"What's one thing you want to be true about yourself by the end of this decade?",d:"If it's specific enough to be measurable, drink 1 as a commitment tax.",sk:"Skip Tax: 3 drinks."},
+  {t:3,c:"spicy",q:"If you could change one decision from our shared life — something we did or didn't do together — what would it be?",d:"Both drink 2. No defending, just listening.",sk:"Skip Tax: 5 drinks."},
+  {t:3,c:"spicy",q:"What's something you've wanted to bring up for a while but couldn't figure out how to start?",d:"You just started it. Drink 1. Other person drinks 2 for listening.",sk:"Skip Tax: 6 drinks. You set this up."},
+  {t:3,c:"spicy",q:"What's one thing about the way I show up that you want more of — and have you told me before?",d:"If it's a first-time disclosure, both drink 2.",sk:"Skip Tax: 4 drinks."},
+  {t:3,c:"spicy",q:"Is there anything about the life chapter coming up that you're privately more nervous about than you've let on?",d:"Both drink 1. No optimism performance required.",sk:"Skip Tax: 5 drinks."},
+  {t:3,c:"wild",q:"If you woke up tomorrow and we'd made the most audacious, reckless decision of our lives together, what would it be — terrified or alive?",d:"If you name the same thing, pour a real drink and toast it.",sk:"Skip Tax: 3 drinks."},
+  {t:3,c:"wild",q:"What's the version of yourself that almost won — the one you chose against — and do you ever miss them?",d:"Both drink 1. Real talk only.",sk:"Skip Tax: 4 drinks."},
+  {t:3,c:"wild",q:"If you had to bet on one thing going sideways in the next five years of our life, what would it be?",d:"If you name the same thing, both drink 2.",sk:"Skip Tax: 3 drinks."},
+  {t:3,c:"wild",q:"What's something you want to do before the next chapter locks in that you haven't said out loud yet?",d:"Both drink 1. Put it on the calendar or drink 2 more.",sk:"Skip Tax: 4 drinks."},
+  {t:3,c:"wild",q:"What's the single biggest swing you could take right now that you've been talking yourself out of?",d:"Drink 1. Then tell me one thing that would need to be true for you to take it.",sk:"Skip Tax: 3 drinks."},
+  {t:3,c:"funny",q:"If you had to roast me in front of all our friends right now — honest, no softening — what's the bit?",d:"Whoever laughs hardest assigns 2 drinks.",sk:"Skip Tax: 3 drinks."},
+  {t:3,c:"funny",q:"What is the most 'us' thing that has ever happened — the story that perfectly captures what our relationship is like?",d:"Both drink 1. Toast the chaos.",sk:"Skip Tax: 2 drinks."},
+  {t:3,c:"funny",q:"If our relationship had a Yelp review from a neutral observer, what would it say?",d:"Most accurate review assigns 1 drink.",sk:"Skip Tax: 2 drinks."},
+];
+
+// ── STATE ──
+let currentPack = null;
+let deck = [], used = 0, skips = 0, activeCat = "all", activeTier = "all";
+
+// ── RENDER PACK LIST ──
+function renderPackList() {
+  const el = document.getElementById('pack-list');
+  el.innerHTML = PACKS.map(p => `
+    <div class="pack-card ${p.locked ? 'locked' : ''}" onclick="openPack('${p.id}')">
+      <div class="pack-icon" style="background:${p.iconBg}">${p.icon}</div>
+      <div class="pack-info">
+        <div class="pack-name">${p.name}</div>
+        <div class="pack-desc">${p.tagline}</div>
+      </div>
+      ${p.locked
+        ? `<span class="pack-badge price">$${p.price.toFixed(2)}</span>`
+        : `<span class="pack-badge free">Owned</span>`}
+    </div>
+  `).join('');
+}
+
+// ── OPEN PACK DETAIL ──
+function openPack(packId) {
+  const p = PACKS.find(x => x.id === packId);
+  if (!p) return;
+  currentPack = p;
+
+  const tL = {1:'Warm Up',2:'Getting Real',3:'No Filter'};
+  const tC = {1:'#2D6A8F',2:'#8B5E1A',3:'#8B1A1A'};
+  const cL = {funny:'Funny',deep:'Deep',relationship:'Relationship',wild:'Wild',spicy:'Spicy'};
+
+  const body = document.getElementById('detail-body');
+  body.innerHTML = `
+    <div class="detail-pack-icon" style="background:${p.iconBg}">${p.icon}</div>
+    <div class="detail-pack-name">${p.name}</div>
+    <div class="detail-pack-sub">${p.description}</div>
+    <div class="detail-stats">
+      <div class="dstat"><div class="dstat-val">${p.questionCount}+</div><div class="dstat-lbl">questions</div></div>
+      <div class="dstat"><div class="dstat-val">3</div><div class="dstat-lbl">tiers</div></div>
+      <div class="dstat"><div class="dstat-val">${p.categories.length}</div><div class="dstat-lbl">categories</div></div>
+    </div>
+    <div class="detail-tiers">
+      ${[1,2,3].map(t => `
+        <div class="tier-row-detail">
+          <div class="tier-pip" style="background:${tC[t]}"></div>
+          <div class="tier-name">${tL[t]}</div>
+          <div class="tier-desc">Tier ${t}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="sample-label">Sample questions</div>
+    ${p.samples.map(q => `
+      <div class="sample-q">
+        <div class="sample-q-text">${q.q}</div>
+        <div class="sample-q-tier">${tL[q.t]} · ${cL[q.c]}</div>
+      </div>
+    `).join('')}
+    <div style="height:8px"></div>
+  `;
+
+  const cta = document.getElementById('detail-cta');
+  if (p.locked) {
+    cta.innerHTML = `<button class="btn-coming">Coming soon — $${p.price.toFixed(2)}</button>`;
+  } else {
+    cta.innerHTML = `<button class="btn-play-pack" onclick="startGame('${p.id}')">Play ${p.name} →</button>`;
+  }
+
+  showScreen('pack-detail');
+}
+
+// ── GAME ──
+function shuffle(a) {
+  let b = [...a];
+  for (let i = b.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [b[i], b[j]] = [b[j], b[i]];
+  }
+  return b;
+}
+
+function startGame(packId) {
+  const questions = FREE_QUESTIONS; // future: swap in pack questions
+  activeCat = "all";
+  activeTier = "all";
+
+  // Reset chip state
+  document.querySelectorAll('.chip[data-f="cat"]').forEach(c => c.classList.remove('on'));
+  document.querySelectorAll('.chip[data-f="tier"]').forEach(c => c.classList.remove('on'));
+  document.querySelector('.chip[data-f="cat"][data-v="all"]').classList.add('on');
+  document.querySelector('.chip[data-f="tier"][data-v="all"]').classList.add('on');
+
+  const packName = packId === 'free' ? 'Candor' : (PACKS.find(p => p.id === packId)?.name || 'Candor');
+  document.getElementById('game-title').textContent = packName;
+
+  deck = shuffle(questions);
+  used = 0;
+  skips = 0;
+  showScreen('game');
+  render();
+}
+
+function buildDeck() {
+  let f = FREE_QUESTIONS;
+  if (activeCat !== "all") f = f.filter(q => q.c === activeCat);
+  if (activeTier !== "all") f = f.filter(q => q.t === parseInt(activeTier));
+  deck = shuffle(f);
+  used = 0;
+  render();
+}
+
+function updateStats() {
+  document.getElementById("s-done").textContent = used;
+  document.getElementById("s-left").textContent = Math.max(0, deck.length - used);
+  document.getElementById("s-skips").textContent = skips;
+  const pct = deck.length > 0 ? Math.round((used / deck.length) * 100) : 0;
+  document.getElementById("prog").style.width = pct + "%";
+}
+
+const tL = {1:"Warm Up", 2:"Getting Real", 3:"No Filter"};
+const tC = {1:"b-t1", 2:"b-t2", 3:"b-t3"};
+const cL = {funny:"Funny", deep:"Deep", relationship:"Relationship", wild:"Wild", spicy:"Spicy"};
+const cC = {funny:"b-funny", deep:"b-deep", relationship:"b-relationship", wild:"b-wild", spicy:"b-spicy"};
+
+function render() {
+  const area = document.getElementById("card-inner");
+  const btns = document.getElementById("btn-area");
+  updateStats();
+  if (used >= deck.length) {
+    area.innerHTML = `<div class="done-screen"><div class="done-icon">🌊</div><div class="done-h">Deck cleared.</div><div class="done-p">You two just talked more honestly than most couples do in a year.<br><br>Shuffle and go again — or pick a category and go deeper.</div><div class="done-btns"><button class="btn-restart" onclick="buildDeck()">Shuffle & Restart</button><button class="btn-home-done" onclick="goHome()">Back to Home</button></div></div>`;
+    btns.style.display = "none";
+    return;
+  }
+  btns.style.display = "flex";
+  const q = deck[used];
+  area.innerHTML = `<div class="qcard"><div class="qcard-top"><span class="badge ${tC[q.t]}">${tL[q.t]}</span><span class="badge ${cC[q.c]}">${cL[q.c]}</span><span class="qnum">${used + 1} / ${deck.length}</span></div><div class="question">${q.q}</div><div class="drink-box"><div class="drink-label">Drink rule</div><div class="drink-text">🥃 ${q.d}</div><div class="skip-text">${q.sk}</div></div></div>`;
+}
+
+document.getElementById("btn-next").addEventListener("click", () => { used++; render(); });
+document.getElementById("btn-skip").addEventListener("click", () => { skips++; used++; render(); });
+document.getElementById("btn-shuffle").addEventListener("click", () => buildDeck());
+document.querySelectorAll(".chip").forEach(el => {
+  el.addEventListener("click", () => {
+    const f = el.dataset.f;
+    document.querySelectorAll(`.chip[data-f="${f}"]`).forEach(x => x.classList.remove("on"));
+    el.classList.add("on");
+    if (f === "cat") activeCat = el.dataset.v;
+    else activeTier = el.dataset.v;
+    buildDeck();
+  });
+});
+
+// ── SCREEN NAVIGATION ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('hidden', 'slide-back');
+  });
+  document.querySelectorAll('.screen').forEach(s => {
+    if (s.id !== id) {
+      s.classList.add(id === 'home' ? 'hidden' : 'slide-back');
+    }
+  });
+}
+
+function goHome() {
+  showScreen('home');
+}
+
+// ── INIT ──
+renderPackList();
+</script>
+</body>
+</html>
