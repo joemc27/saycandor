@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Candor — Say what you mean.</title>
+  <meta name="description" content="A card game that gets past the small talk. Launching soon — join the waitlist." />
+  <meta property="og:title" content="Candor — Say what you mean." />
+  <meta property="og:description" content="A card game that gets past the small talk. Launching soon." />
+  <meta property="og:url" content="https://saycandor.com" />
+  <meta name="theme-color" content="#111E2D" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      background: #111E2D;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      color: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 4rem 1.5rem 3rem;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: #D4891A;
+      border: 1px solid rgba(212, 137, 26, 0.4);
+      padding: 5px 16px;
+      border-radius: 20px;
+      margin-bottom: 2rem;
+    }
+
+    .wordmark {
+      font-family: 'Libre Baskerville', serif;
+      font-style: italic;
+      font-size: clamp(52px, 14vw, 76px);
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .tagline {
+      font-family: 'Libre Baskerville', serif;
+      font-style: normal;
+      font-size: 17px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 2.75rem;
+      text-align: center;
+      letter-spacing: 0.01em;
+    }
+
+    .headline {
+      font-family: 'Libre Baskerville', serif;
+      font-weight: 400;
+      font-size: clamp(22px, 5vw, 30px);
+      color: #FFFFFF;
+      text-align: center;
+      max-width: 480px;
+      line-height: 1.4;
+      margin-bottom: 0.75rem;
+    }
+
+    .subhead {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.42);
+      text-align: center;
+      max-width: 360px;
+      line-height: 1.65;
+      margin-bottom: 2.5rem;
+    }
+
+    .card {
+      background: #1C2F45;
+      border-radius: 16px;
+      padding: 1.5rem 1.75rem;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-tier {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: #D4891A;
+      margin-bottom: 12px;
+    }
+
+    .card-question {
+      font-family: 'Libre Baskerville', serif;
+      font-style: italic;
+      font-size: 20px;
+      color: #FFFFFF;
+      line-height: 1.45;
+    }
+
+    .card-glow {
+      position: absolute;
+      bottom: -20px;
+      right: -20px;
+      width: 80px;
+      height: 80px;
+      background: rgba(212, 137, 26, 0.07);
+      border-radius: 50%;
+    }
+
+    /* Form section — contains the label above and the iframe */
+    .form-section {
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .form-label {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.55);
+      text-align: center;
+      letter-spacing: 0.01em;
+    }
+
+    /* Wrapper that blends the iframe into the page background */
+    .form-wrap {
+      width: 100%;
+      background: #111E2D;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      overflow: hidden;
+      padding: 0.25rem 0;
+    }
+
+    .form-wrap iframe {
+      width: 100% !important;
+      max-width: 100% !important;
+      display: block;
+    }
+
+    .fine-print {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.22);
+      text-align: center;
+      margin-bottom: 2.75rem;
+    }
+
+    .divider {
+      width: 36px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      margin-bottom: 2.75rem;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      max-width: 440px;
+      margin-bottom: 3rem;
+    }
+
+    .pill {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.38);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 5px 14px;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.18);
+    }
+  </style>
+</head>
+<body>
+
+  <span class="badge">Coming soon</span>
+
+  <h1 class="wordmark">Candor</h1>
+  <p class="tagline">Say what you mean.</p>
+
+  <h2 class="headline">Get past the small talk.</h2>
+  <p class="subhead">A card game with real questions and actual stakes. Launching soon — join the waitlist.</p>
+
+  <div class="card">
+    <div class="card-tier">Getting Real · Round 2</div>
+    <p class="card-question">"What's something you've changed your mind about in the last year?"</p>
+    <div class="card-glow"></div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-wrap">
+      <script async src="https://subscribe-forms.beehiiv.com/embed.js"></script>
+      <iframe
+        src="https://subscribe-forms.beehiiv.com/e678886f-17ab-46f6-9a03-2f3aff5d5c50"
+        class="beehiiv-embed"
+        data-test-id="beehiiv-embed"
+        frameborder="0"
+        scrolling="no"
+        style="width: 100%; height: 291px; border-radius: 0px; background-color: transparent; box-shadow: none; max-width: 100%;"
+      ></iframe>
+    </div>
+  </div>
+
+  <p class="fine-print">No spam. Just a heads up when we launch.</p>
+
+  <div class="divider"></div>
+
+  <div class="pills">
+    <span class="pill">Warm Up → Getting Real → No Filter</span>
+    <span class="pill">Couples · Friends · First Dates · Family · Road Trip</span>
+    <span class="pill">Free base deck + paid packs</span>
+  </div>
+
+  <p class="footer">saycandor.com</p>
+
+</body>
+</html>
